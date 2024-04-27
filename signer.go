@@ -21,6 +21,7 @@ func setSigner(fpath string) (ssh.Signer, error) {
 	if block == nil || block.Type != "RSA PRIVATE KEY" {
 		return nil, fmt.Errorf("invalid private key format")
 	}
+
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing private key: %v", err)
