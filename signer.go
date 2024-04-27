@@ -9,27 +9,53 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+func parsePemBlock(block *pem.Block) (interface{}, error) {
+	switch block.Type {
+	case "RSA PRIVATE KEY":
+		privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		return privateKey, nil
+	case "EC PRIVATE KEY":
+		privateKey, err := x509.ParseECPrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		return privateKey, nil
+	case "DSA PRIVATE KEY":
+		privateKey, err := ssh.ParseDSAPrivateKey(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		return privateKey, nil
+	default:
+		return nil, fmt.Errorf("unsupported key type %v", block.Type)
+	}
+}
+
 func setSigner(fpath string) (ssh.Signer, error) {
 	var err error
+	var privateKey interface{}
 
 	keyData, err := os.ReadFile(fpath)
 	if err != nil {
-		return nil, fmt.Errorf("failed reading private key file: %v", err)
+		return nil, err
 	}
 
 	block, _ := pem.Decode(keyData)
-	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		return nil, fmt.Errorf("invalid private key format")
+	if block == nil {
+		return nil, err
 	}
 
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	privateKey, err = parsePemBlock(block)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing private key: %v", err)
+		return nil, err
 	}
 
 	signer, err := ssh.NewSignerFromKey(privateKey)
 	if err != nil {
-		return nil, fmt.Errorf("error creating signer: %v", err)
+		return nil, err
 	}
 
 	return signer, nil
