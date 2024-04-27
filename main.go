@@ -33,6 +33,12 @@ func openSession() (err error) {
 		}
 
 		config.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
+		if *password != "" {
+			config.Auth = []ssh.AuthMethod{
+				ssh.PublicKeys(signer),
+				ssh.Password(*password),
+			}
+		}
 	}
 
 	hostport := fmt.Sprintf("%s:%d", flag.Arg(0), *port)
