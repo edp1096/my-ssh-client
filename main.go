@@ -15,6 +15,7 @@ var (
 	user     = flag.String("l", "", "login_name")
 	password = flag.String("passwd", "", "password")
 	port     = flag.Int("p", 22, "port")
+	keyfile  = flag.String("i", "", "private key")
 )
 
 func openSession() (err error) {
@@ -23,6 +24,15 @@ func openSession() (err error) {
 		Auth:            []ssh.AuthMethod{ssh.Password(*password)},
 		Timeout:         5 * time.Second,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+	}
+
+	if *keyfile != "" {
+		signer, err := setSigner(*keyfile)
+		if err != nil {
+			panic(err)
+		}
+
+		config.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	}
 
 	hostport := fmt.Sprintf("%s:%d", flag.Arg(0), *port)
