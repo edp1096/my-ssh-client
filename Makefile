@@ -1,12 +1,12 @@
 build:
-	go build -trimpath -o bin/ ./cmd
+	go build -trimpath -o bin/ .
 
 build-vendor:
 	go work vendor
-	go build -mod vendor -trimpath -o bin/ ./cmd
+	go build -mod vendor -trimpath -o bin/ .
 
 debug:
-	go build -o bin/ ./cmd
+	go build -o bin/ .
 
 dist:
 	go get -d github.com/mitchellh/gox
