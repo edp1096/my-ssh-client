@@ -8,15 +8,15 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func clearBuffer(tty *gotty.TTY) {
-	// Clear tty buffer
-	for {
-		_, _ = tty.ReadRune()
-		if !tty.Buffered() {
-			break
-		}
-	}
-}
+// func clearBuffer(tty *gotty.TTY) {
+// 	// Clear tty buffer
+// 	for {
+// 		_, _ = tty.ReadRune()
+// 		if !tty.Buffered() {
+// 			break
+// 		}
+// 	}
+// }
 
 func setResizeControl(sess *ssh.Session, tty *gotty.TTY, w, h int) {
 	go func() {
@@ -28,8 +28,6 @@ func setResizeControl(sess *ssh.Session, tty *gotty.TTY, w, h int) {
 }
 
 func setEventControl(pw io.WriteCloser, tty *gotty.TTY) {
-	clearBuffer(tty)
-
 	go func() {
 		var b []byte
 		for {
