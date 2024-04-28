@@ -1,3 +1,4 @@
+// TODO: try windows signature - https://github.com/mwiater/golangsignedbins
 package main // import "keygen"
 
 import (
@@ -5,12 +6,25 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
+var bitSize = flag.Int("s", 2048, "Max key size - 521/1024/2048/4096")
+
+func parseFlag() {
+	fpath := os.Args[0]
+	os.Args[0] = filepath.Base(os.Args[0])
+
+	flag.Parse()
+
+	os.Args[0] = fpath
+}
+
 func savePrivateKey() (privateKey *rsa.PrivateKey, err error) {
-	privateKey, err = rsa.GenerateKey(rand.Reader, 2048)
+	privateKey, err = rsa.GenerateKey(rand.Reader, *bitSize)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate RSA key: %s", err)
 	}
@@ -60,6 +74,8 @@ func savePublicKey(privateKey *rsa.PrivateKey) (err error) {
 }
 
 func main() {
+	parseFlag()
+
 	privateKey, err := savePrivateKey()
 	if err != nil {
 		fmt.Println(err)
@@ -72,6 +88,5 @@ func main() {
 		fmt.Println(err)
 		os.Exit(2)
 	}
-
 	fmt.Println("Public key generated and saved to public_key.pem")
 }
