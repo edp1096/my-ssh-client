@@ -1,4 +1,4 @@
-Password input SSH Client for my personal usage
+SSH Client for my personal usage
 
 ## Usage
 ```sh
