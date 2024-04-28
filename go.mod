@@ -3,7 +3,6 @@ module ssh-client
 go 1.22.2
 
 require (
-	github.com/creack/pty v1.1.21
 	github.com/mattn/go-tty v0.0.5
 	golang.org/x/crypto v0.22.0
 )
