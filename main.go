@@ -50,6 +50,7 @@ func main() {
 
 	*hostsIDX--
 	host = hosts[*hostsIDX]
+	fmt.Printf("Connecting %s/%s\n", host.Name, host.Address)
 
 	err = openSession()
 	if err != nil {
