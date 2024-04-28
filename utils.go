@@ -96,14 +96,16 @@ func loadHostData(fileName string, key []byte, decryptedData interface{}) error 
 
 // Not use
 func generateKey(password string) (key []byte, err error) {
-	salt := make([]byte, 16)
-	_, err = rand.Read(salt)
-	if err != nil {
-		fmt.Println("error generating salt:", err)
-		return key, err
-	}
+	// salt := make([]byte, 16)
+	// _, err = rand.Read(salt)
+	// if err != nil {
+	// 	fmt.Println("error generating salt:", err)
+	// 	return key, err
+	// }
+	salt := sha256.Sum256([]byte(password))
 
-	key = pbkdf2.Key([]byte(password), salt, 10000, 32, sha256.New)
+	fmt.Println("salt bytes:", salt)
+	key = pbkdf2.Key([]byte(password), salt[:], 10000, 32, sha256.New)
 
 	return key, nil
 }
