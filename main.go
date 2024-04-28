@@ -5,29 +5,42 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	gotty "github.com/mattn/go-tty"
 	"golang.org/x/crypto/ssh"
 )
 
+type HostInfo struct {
+	Name           string
+	Address        string
+	Port           int
+	Username       string
+	Password       string
+	PrivateKeyFile string
+	PrivateKeyText string
+}
+
 var (
-	user     = flag.String("l", "", "login_name")
-	password = flag.String("passwd", "", "password")
-	port     = flag.Int("p", 22, "port")
-	keyfile  = flag.String("i", "", "private key")
+	hostsFile = flag.String("f", "", "host data file (required)")
+	hostsIDX  = flag.Int("i", 0, "index of host data (required)")
+
+	hosts []HostInfo // All host data
+	host  HostInfo   // Selected host
+	key   []byte     // AES key (32byte = 256bit)
 )
 
 func openSession() (err error) {
 	config := &ssh.ClientConfig{
-		User:            *user,
-		Auth:            []ssh.AuthMethod{ssh.Password(*password)},
+		User:            host.Username,
+		Auth:            []ssh.AuthMethod{ssh.Password(host.Password)},
 		Timeout:         5 * time.Second,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
-	if *keyfile != "" {
-		signer, err := setSigner(*keyfile)
+	if host.PrivateKeyFile != "" {
+		signer, err := setSigner(host.PrivateKeyFile)
 		if err != nil {
 			panic(err)
 		}
@@ -35,7 +48,7 @@ func openSession() (err error) {
 		config.Auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	}
 
-	hostport := fmt.Sprintf("%s:%d", flag.Arg(0), *port)
+	hostport := fmt.Sprintf("%s:%d", host.Address, host.Port)
 	conn, err := ssh.Dial("tcp", hostport, config)
 	if err != nil {
 		return fmt.Errorf("ssh.Dial %v: %v", hostport, err)
@@ -105,12 +118,29 @@ func openSession() (err error) {
 
 func main() {
 	flag.Parse()
-	if flag.NArg() == 0 {
-		flag.Usage()
-		os.Exit(2)
+	if flag.NArg() > 0 || *hostsFile == "" || *hostsIDX == 0 {
+		binaryName := filepath.Base(os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", binaryName)
+		flag.PrintDefaults()
+		return
 	}
 
-	err := openSession()
+	key = []byte("0123456789!#$%^&*()abcdefghijklm")
+	err := loadHostData(*hostsFile, key, &hosts)
+	if err != nil {
+		fmt.Println("error loading host data file")
+		return
+	}
+
+	if *hostsIDX > len(hosts) {
+		fmt.Printf("index not exist. max index is %d\n", len(hosts))
+		return
+	}
+
+	*hostsIDX--
+	host = hosts[*hostsIDX]
+
+	err = openSession()
 	if err != nil {
 		fmt.Println(err)
 	}
