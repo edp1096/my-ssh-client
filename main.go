@@ -22,9 +22,9 @@ var (
 	hostsFile = flag.String("f", "", "host data file (required)")
 	hostsIDX  = flag.Int("i", 0, "index of host data (required)")
 
-	hosts []HostInfo // All host data
-	host  HostInfo   // Selected host
-	key   []byte     // AES key (32byte = 256bit)
+	hosts []HostInfo
+	host  HostInfo
+	key   []byte
 )
 
 func main() {

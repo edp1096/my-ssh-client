@@ -19,6 +19,7 @@ func ContainsMapKey[K comparable, V any](m map[K]V, key K) bool {
 	return ok
 }
 
+// Not use
 func saveHostData(fileName string, data interface{}, key []byte) error {
 	var buf bytes.Buffer
 	iv := make([]byte, aes.BlockSize)
