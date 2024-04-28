@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
+	"fmt"
 	"io"
 	"os"
 )
@@ -88,4 +89,32 @@ func loadHostData(fileName string, key []byte, decryptedData interface{}) error 
 	}
 
 	return nil
+}
+
+// Not use
+func CreateSampleHostData() {
+	hosts := []HostInfo{
+		{Name: "Local", Address: "localhost", Port: 10122, Username: "user", Password: "12345"},
+		{Name: "Local using key", Address: "localhost", Port: 10222, Username: "user", PrivateKeyFile: "my_private_key.pem"},
+	}
+
+	fileName := "hosts.dat"
+	// key := []byte("0123456789!#$%^&*()abcdefghijklm") // AES key (32byte = 256bit)
+
+	err := saveHostData(fileName, hosts, key)
+	if err != nil {
+		fmt.Println("error saving data:", err)
+		return
+	}
+
+	fmt.Println("data is saved to", fileName)
+
+	// var decodedHosts []HostInfo
+	// err = loadHostData(fileName, key, &decodedHosts)
+	// if err != nil {
+	// 	fmt.Println("Error loading data:", err)
+	// 	return
+	// }
+
+	// fmt.Println("data is loaded:", decodedHosts)
 }

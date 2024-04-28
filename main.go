@@ -14,6 +14,7 @@ import (
 
 type HostInfo struct {
 	Name           string
+	Description    string
 	Address        string
 	Port           int
 	Username       string
