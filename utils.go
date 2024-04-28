@@ -5,10 +5,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
 	"io"
 	"os"
+
+	"golang.org/x/crypto/pbkdf2"
 )
 
 func ContainsMapKey[K comparable, V any](m map[K]V, key K) bool {
@@ -92,16 +95,38 @@ func loadHostData(fileName string, key []byte, decryptedData interface{}) error 
 }
 
 // Not use
+func generateKey(password string) (key []byte, err error) {
+	salt := make([]byte, 16)
+	_, err = rand.Read(salt)
+	if err != nil {
+		fmt.Println("error generating salt:", err)
+		return key, err
+	}
+
+	key = pbkdf2.Key([]byte(password), salt, 10000, 32, sha256.New)
+
+	return key, nil
+}
+
+// Not use
 func CreateSampleHostData() {
+	var err error
+
 	hosts := []HostInfo{
 		{Name: "Local", Address: "localhost", Port: 10122, Username: "user", Password: "12345"},
 		{Name: "Local using key", Address: "localhost", Port: 10222, Username: "user", PrivateKeyFile: "my_private_key.pem"},
 	}
-
 	fileName := "hosts.dat"
-	// key := []byte("0123456789!#$%^&*()abcdefghijklm") // AES key (32byte = 256bit)
 
-	err := saveHostData(fileName, hosts, key)
+	// key := []byte("0123456789!#$%^&*()abcdefghijklm") // AES key (32byte = 256bit)
+	authPassword := "my_secret"
+	key, err := generateKey(authPassword)
+	if err != nil {
+		fmt.Println("error generate key:", err)
+		return
+	}
+
+	err = saveHostData(fileName, hosts, key)
 	if err != nil {
 		fmt.Println("error saving data:", err)
 		return
