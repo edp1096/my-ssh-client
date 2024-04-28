@@ -2,11 +2,7 @@ Password input SSH Client for my personal usage
 
 ## Usage
 ```sh
-.\ssh-client.exe -l my_account -passwd my_password -p port ip_adress
-```
-```sh
-# Using private key
-.\ssh-client.exe -l my_account -i privatekey_path -p port ip_adress
+./ssh-client.exe -f ./hosts.dat -i 1
 ```
 
 ## Source
