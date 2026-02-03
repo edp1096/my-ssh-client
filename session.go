@@ -63,8 +63,6 @@ func openSession() (err error) {
 		w, h = 0, 0
 	}
 
-	setResizeControl(sess, tty, w, h)
-
 	clean, err := tty.Raw()
 	if err != nil {
 		log.Fatal(err)
@@ -89,6 +87,7 @@ func openSession() (err error) {
 		return fmt.Errorf("sess.Shell: %v", err)
 	}
 
+	setResizeControl(sess, tty, pw, w, h)
 	setEventControl(pw, tty)
 
 	sess.Wait()
